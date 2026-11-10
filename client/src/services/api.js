@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || '/api', withCredentials: true, timeout: 25000 });
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '');
+const apiBaseUrl = configuredApiUrl
+  ? (/\/api$/i.test(configuredApiUrl) ? configuredApiUrl : `${configuredApiUrl}/api`)
+  : '/api';
+
+const api = axios.create({ baseURL: apiBaseUrl, withCredentials: true, timeout: 25000 });
 
 const RETRYABLE = [502, 503, 504];
 api.interceptors.response.use(
