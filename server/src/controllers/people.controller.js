@@ -30,6 +30,11 @@ export function serializePerson(p, user) {
   };
   if (can(user, 'people.viewPhone')) out.phone = p.normalizedPhone;
   if (can(user, 'people.viewAddress')) out.address = p.address;
+  if (can(user, 'people.viewBankDetails')) {
+    out.bankName = p.bankName;
+    out.accountNumber = p.accountNumber;
+    out.accountName = p.accountName;
+  }
   if (can(user, 'people.viewConsent')) out.consent = p.consent;
   if (can(user, 'people.viewImage')) out.image = p.image;
   if (can(user, 'people.viewVoterCard')) out.voterCardImage = p.voterCardImage;
@@ -122,6 +127,11 @@ export const create = asyncHandler(async (req, res) => {
     fullName: b.fullName, phone: normalizedPhone, normalizedPhone,
     wardId: b.wardId, pollingUnitId: b.pollingUnitId,
     address: b.address || undefined, preferredContact: b.preferredContact || undefined, notes: b.notes || undefined,
+    ...(can(req.user, 'people.viewBankDetails') ? {
+      bankName: b.bankName || undefined,
+      accountNumber: b.accountNumber || undefined,
+      accountName: b.accountName || undefined,
+    } : {}),
     image: b.image || undefined, imagePublicId: b.imagePublicId || undefined,
     voterCardImage: b.voterCardImage || undefined, voterCardPublicId: b.voterCardPublicId || undefined,
     consent: { granted: b.consent.granted, purpose: b.consent.purpose || undefined, lawfulBasis: b.consent.lawfulBasis, recordedAt: new Date() },
@@ -158,6 +168,9 @@ export const update = asyncHandler(async (req, res) => {
     p.pollingUnitId = unitId;
   }
   if (b.address !== undefined && can(req.user, 'people.viewAddress')) p.address = b.address || undefined;
+  if (b.bankName !== undefined && can(req.user, 'people.viewBankDetails')) p.bankName = b.bankName || undefined;
+  if (b.accountNumber !== undefined && can(req.user, 'people.viewBankDetails')) p.accountNumber = b.accountNumber || undefined;
+  if (b.accountName !== undefined && can(req.user, 'people.viewBankDetails')) p.accountName = b.accountName || undefined;
   if (b.preferredContact !== undefined) p.preferredContact = b.preferredContact || undefined;
   if (b.notes !== undefined) p.notes = b.notes || undefined;
   applyImage(p, b, 'image', 'imagePublicId');

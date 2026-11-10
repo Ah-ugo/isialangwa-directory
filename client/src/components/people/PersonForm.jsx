@@ -8,7 +8,7 @@ import SearchableSelect from '../common/SearchableSelect';
 import { normalizePhone } from '../../utils/format';
 import { T } from '../../theme';
 
-const blank = (purpose, wardId = '') => ({ fullName: '', phone: '', address: '', wardId, pollingUnitId: '', preferredContact: '', notes: '', granted: false, purpose });
+const blank = (purpose, wardId = '') => ({ fullName: '', phone: '', address: '', bankName: '', accountNumber: '', accountName: '', wardId, pollingUnitId: '', preferredContact: '', notes: '', granted: false, purpose });
 
 export default function PersonForm({ isOpen, onClose, person, onSaved, defaultWardId }) {
   const { can, settings } = useAuth();
@@ -30,12 +30,13 @@ export default function PersonForm({ isOpen, onClose, person, onSaved, defaultWa
 
   const showPhone = !editing || can('people.viewPhone');
   const showAddress = !editing || can('people.viewAddress');
+  const showBankDetails = can('people.viewBankDetails');
   const showConsent = !editing || can('people.manageConsent');
 
   useEffect(() => {
     if (!isOpen) return;
     setErrors({}); setDupes(null);
-    if (person) { setF({ fullName: person.fullName, phone: person.phone || '', address: person.address || '', wardId: person.wardId, pollingUnitId: person.pollingUnitId, preferredContact: person.preferredContact || '', notes: person.notes || '', granted: !!person.consent?.granted && !person.consent?.withdrawnAt, purpose: person.consent?.purpose || settings?.consentPurpose || '' }); setPhotoUrl(person.image || ''); setPhotoPublicId(person.imagePublicId || ''); setVcardUrl(person.voterCardImage || ''); setVcardPublicId(person.voterCardPublicId || ''); }
+    if (person) { setF({ fullName: person.fullName, phone: person.phone || '', address: person.address || '', bankName: person.bankName || '', accountNumber: person.accountNumber || '', accountName: person.accountName || '', wardId: person.wardId, pollingUnitId: person.pollingUnitId, preferredContact: person.preferredContact || '', notes: person.notes || '', granted: !!person.consent?.granted && !person.consent?.withdrawnAt, purpose: person.consent?.purpose || settings?.consentPurpose || '' }); setPhotoUrl(person.image || ''); setPhotoPublicId(person.imagePublicId || ''); setVcardUrl(person.voterCardImage || ''); setVcardPublicId(person.voterCardPublicId || ''); }
     else setF(blank(settings?.consentPurpose || '', defaultWardId || ''));
   }, [isOpen, person, settings, defaultWardId]);
 
@@ -100,6 +101,11 @@ export default function PersonForm({ isOpen, onClose, person, onSaved, defaultWa
     const body = { fullName: f.fullName.trim(), wardId: f.wardId, pollingUnitId: f.pollingUnitId, preferredContact: f.preferredContact, notes: f.notes, force };
     if (showPhone) body.phone = f.phone;
     if (showAddress) body.address = f.address;
+    if (showBankDetails) {
+      body.bankName = f.bankName;
+      body.accountNumber = f.accountNumber;
+      body.accountName = f.accountName;
+    }
     if (showConsent) body.consent = { granted: f.granted, purpose: f.purpose, lawfulBasis: 'consent' };
     try {
       let nextPhotoUrl = photoUrl;
@@ -164,6 +170,15 @@ export default function PersonForm({ isOpen, onClose, person, onSaved, defaultWa
                   </Alert>
                 )}
                 {showAddress && <FormControl><FormLabel>Address <Text as="span" color={T.muted}>(optional)</Text></FormLabel><Input value={f.address} onChange={(e) => set('address', e.target.value)} /></FormControl>}
+                {showBankDetails && (
+                  <>
+                    <Divider />
+                    <Text fontWeight={600}>Bank details</Text>
+                    <FormControl><FormLabel>Bank name</FormLabel><Input value={f.bankName} onChange={(e) => set('bankName', e.target.value)} autoComplete="off" /></FormControl>
+                    <FormControl><FormLabel>Account number</FormLabel><Input inputMode="numeric" autoComplete="off" value={f.accountNumber} onChange={(e) => set('accountNumber', e.target.value)} /></FormControl>
+                    <FormControl><FormLabel>Name on account</FormLabel><Input value={f.accountName} onChange={(e) => set('accountName', e.target.value)} autoComplete="off" /></FormControl>
+                  </>
+                )}
               </Stack>
             </Box>
             <Divider />

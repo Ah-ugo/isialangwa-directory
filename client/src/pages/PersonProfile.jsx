@@ -83,6 +83,9 @@ export default function PersonProfile() {
             {'phone' in p && <Row label="Phone number">{prettyPhone(p.phone)}</Row>}
             <Row label="Preferred contact">{p.preferredContact === 'call' ? 'Call' : p.preferredContact === 'whatsapp' ? 'WhatsApp' : ''}</Row>
             {'address' in p && <Row label="Address">{p.address}</Row>}
+            {'bankName' in p && <Row label="Bank name">{p.bankName}</Row>}
+            {'accountNumber' in p && <Row label="Account number">{p.accountNumber}</Row>}
+            {'accountName' in p && <Row label="Name on account">{p.accountName}</Row>}
             <Row label="Registered">{fmtDate(p.createdAt)}</Row>
           </Grid>
           {(can('people.viewImage') || can('people.viewVoterCard')) && (

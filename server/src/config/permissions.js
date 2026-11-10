@@ -1,7 +1,7 @@
 // Single source of truth for the permission model.
 export const PERMISSION_TREE = {
   dashboard: ['view'],
-  people: ['view', 'create', 'edit', 'delete', 'viewPhone', 'viewAddress', 'contact', 'whatsapp', 'viewConsent', 'manageConsent', 'viewImage', 'viewVoterCard'],
+  people: ['view', 'create', 'edit', 'delete', 'viewPhone', 'viewAddress', 'viewBankDetails', 'contact', 'whatsapp', 'viewConsent', 'manageConsent', 'viewImage', 'viewVoterCard'],
   wards: ['view', 'create', 'edit', 'delete'],
   pollingUnits: ['view', 'create', 'edit', 'delete'],
   administrators: ['view', 'create', 'edit', 'deactivate'],

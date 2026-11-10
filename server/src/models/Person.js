@@ -8,6 +8,9 @@ const schema = new mongoose.Schema(
     wardId: { type: mongoose.Schema.Types.ObjectId, ref: 'Ward', required: true },
     pollingUnitId: { type: mongoose.Schema.Types.ObjectId, ref: 'PollingUnit', required: true },
     address: { type: String, trim: true },
+    bankName: { type: String, trim: true },
+    accountNumber: { type: String, trim: true },
+    accountName: { type: String, trim: true },
     preferredContact: { type: String, enum: ['call', 'whatsapp'] },
     consent: {
       granted: { type: Boolean, required: true },

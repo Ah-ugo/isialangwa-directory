@@ -104,6 +104,7 @@ export const exportPeople = asyncHandler(async (req, res) => {
   if (can(req.user, 'people.viewPhone')) cols.push(['Phone Number', (p) => csvCell(p.normalizedPhone, { raw: true })]);
   cols.push(['Ward', (p) => csvCell(p.wardId?.name)], ['Polling Unit', (p) => csvCell(p.pollingUnitId?.name)]);
   if (can(req.user, 'people.viewAddress')) cols.push(['Address', (p) => csvCell(p.address)]);
+  if (can(req.user, 'people.viewBankDetails')) cols.push(['Bank Name', (p) => csvCell(p.bankName)], ['Account Number', (p) => csvCell(p.accountNumber)], ['Name on Account', (p) => csvCell(p.accountName)]);
   cols.push(['Preferred Contact', (p) => csvCell(p.preferredContact)]);
   if (can(req.user, 'people.viewConsent')) cols.push(['Consent Status', (p) => (p.consent?.granted && !p.consent?.withdrawnAt ? 'Granted' : 'Withdrawn')]);
 
