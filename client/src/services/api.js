@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const configuredApiUrl = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '');
-const apiBaseUrl = configuredApiUrl
+const apiBaseUrl = import.meta.env.PROD
+  ? '/api'
+  : configuredApiUrl
   ? (/\/api$/i.test(configuredApiUrl) ? configuredApiUrl : `${configuredApiUrl}/api`)
   : '/api';
 

@@ -20,8 +20,8 @@ Add the standard Isialangwa South wards to the configured MongoDB database with 
 
 ## Deploy
 - **API → Render** (Web Service, root `server`, build `npm install`, start `npm start`). Env: `NODE_ENV=production`, `MONGODB_URI`, `SESSION_SECRET`, `CLIENT_URL=https://your-app.vercel.app`. Run `create-superadmin` once from the Render shell.
-- **Client → Vercel** (root `client`, framework Vite). Env: `VITE_API_URL=https://your-api.onrender.com/api`.
-- Cookies are `HttpOnly`, `Secure`, `SameSite=None` in production (cross-site Vercel ↔ Render). Use HTTPS everywhere.
+- **Client → Vercel** (root `client`, framework Vite). Production API calls use the same-origin `/api` rewrite in `client/vercel.json`; update its destination if the API deployment URL changes. Do not set `VITE_API_URL` in the Vercel client project.
+- Cookies are `HttpOnly`, `Secure`, and `SameSite=None` in production. The same-origin rewrite keeps the browser session cookie first-party. Use HTTPS everywhere.
 
 ## Security model
 - Every request reloads the user; deactivation, permission edits and password resets bump `tokenVersion`, ending sessions immediately.
