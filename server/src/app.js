@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { env } from './config/env.js';
+import { connectDB } from './config/db.js';
 import routes from './routes/index.js';
 import { sanitize, originCheck, apiLimiter } from './middleware/security.js';
 import { notFound, errorHandler } from './middleware/errors.js';
@@ -13,6 +14,14 @@ app.disable('x-powered-by');
 app.use(helmet());
 app.use(cors({ origin: env.CLIENT_URLS, credentials: true }));
 app.use(cookieParser());
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 app.get('/health', (req, res) => res.json({ ok: true }));
 app.use('/api', apiLimiter);
 // CSV imports send parsed rows as JSON, so those routes get a larger body limit; everything else stays small.
