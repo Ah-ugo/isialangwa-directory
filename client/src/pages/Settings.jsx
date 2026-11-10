@@ -11,7 +11,14 @@ import { T } from '../theme';
 function Account() {
   const { user, setUser, logout, settings } = useAuth();
   const notify = useNotify();
-  const [p, setP] = useState({ fullName: user.fullName, username: user.username, email: user.email });
+  const [p, setP] = useState({
+    fullName: user.fullName,
+    username: user.username,
+    email: user.email,
+    bankName: user.bankName || '',
+    accountNumber: user.accountNumber || '',
+    accountName: user.accountName || '',
+  });
   const [pw, setPw] = useState({ currentPassword: '', newPassword: '' });
   const [busy, setBusy] = useState('');
   const act = async (key, fn, ok) => { setBusy(key); try { await fn(); notify.success(ok); } catch (e) { notify.error(e); } finally { setBusy(''); } };
@@ -21,6 +28,12 @@ function Account() {
         <Text fontWeight={600} fontSize="16px">Profile</Text>
         <FormControl><FormLabel>Full name</FormLabel><Input value={p.fullName} onChange={(e) => setP({ ...p, fullName: e.target.value })} /></FormControl>
         <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}><FormControl><FormLabel>Username</FormLabel><Input value={p.username} onChange={(e) => setP({ ...p, username: e.target.value })} /></FormControl><FormControl><FormLabel>Email</FormLabel><Input type="email" value={p.email} onChange={(e) => setP({ ...p, email: e.target.value })} /></FormControl></SimpleGrid>
+        <Text fontWeight={600} fontSize="14px">Bank details</Text>
+        <FormControl><FormLabel>Bank name</FormLabel><Input value={p.bankName} onChange={(e) => setP({ ...p, bankName: e.target.value })} /></FormControl>
+        <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
+          <FormControl><FormLabel>Account number</FormLabel><Input inputMode="numeric" autoComplete="off" value={p.accountNumber} onChange={(e) => setP({ ...p, accountNumber: e.target.value })} /></FormControl>
+          <FormControl><FormLabel>Name on account</FormLabel><Input value={p.accountName} onChange={(e) => setP({ ...p, accountName: e.target.value })} /></FormControl>
+        </SimpleGrid>
         <Box><Button isLoading={busy === 'p'} onClick={() => act('p', async () => { const r = await api.put('/auth/profile', p); setUser(r.data.data); }, 'Profile updated')}>Save profile</Button></Box>
       </Stack>
       <Stack spacing={4}>

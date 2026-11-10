@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import { ApiError, asyncHandler, ok } from '../utils/helpers.js';
 import { issueSession, clearSession, hashPassword, assertPasswordStrength, serializeUser } from '../utils/session.js';
-import { changePasswordSchema, loginSchema, profileSchema } from '../validators/index.js';
+import { changePasswordSchema, loginSchema, userProfileSchema } from '../validators/index.js';
 import { getSettings } from '../services/settings.js';
 import { logActivity } from '../services/activity.js';
 
@@ -64,9 +64,16 @@ export const changePassword = asyncHandler(async (req, res) => {
 });
 
 export const updateProfile = asyncHandler(async (req, res) => {
-  const body = profileSchema.parse(req.body);
+  const body = userProfileSchema.parse(req.body);
   const user = req.user;
-  Object.assign(user, { fullName: body.fullName, username: body.username.toLowerCase(), email: body.email.toLowerCase() });
+  Object.assign(user, {
+    fullName: body.fullName,
+    username: body.username.toLowerCase(),
+    email: body.email.toLowerCase(),
+    bankName: body.bankName || undefined,
+    accountNumber: body.accountNumber || undefined,
+    accountName: body.accountName || undefined,
+  });
   await user.save();
   ok(res, { message: 'Profile updated', data: serializeUser(user) });
 });
