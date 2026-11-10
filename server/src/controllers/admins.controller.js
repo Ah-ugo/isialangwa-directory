@@ -36,6 +36,9 @@ export const create = asyncHandler(async (req, res) => {
     fullName: body.fullName,
     username: body.username.toLowerCase(),
     email: body.email.toLowerCase(),
+    bankName: body.bankName || undefined,
+    accountNumber: body.accountNumber || undefined,
+    accountName: body.accountName || undefined,
     passwordHash: await hashPassword(password),
     role: 'admin',
     permissions: sanitizePermissions(body.permissions),
@@ -50,7 +53,7 @@ export const update = asyncHandler(async (req, res) => {
   const body = adminUpdateSchema.parse(req.body);
   const u = await target(req);
   guardProtected(u, req, 'edited');
-  Object.assign(u, { fullName: body.fullName, username: body.username.toLowerCase(), email: body.email.toLowerCase() });
+  Object.assign(u, { fullName: body.fullName, username: body.username.toLowerCase(), email: body.email.toLowerCase(), bankName: body.bankName || undefined, accountNumber: body.accountNumber || undefined, accountName: body.accountName || undefined });
   await u.save();
   await logActivity(req, { action: 'admin.updated', resourceType: 'user', resourceId: u._id, description: `Updated administrator ${u.fullName}` });
   ok(res, { data: serializeUser(u) });

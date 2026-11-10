@@ -10,7 +10,7 @@ import { T } from '../../theme';
 export default function AdminDrawer({ isOpen, onClose, mode, admin, onSaved }) {
   const notify = useNotify();
   const placement = useBreakpointValue({ base: 'bottom', md: 'right' });
-  const [f, setF] = useState({ fullName: '', username: '', email: '' });
+  const [f, setF] = useState({ fullName: '', username: '', email: '', bankName: '', accountNumber: '', accountName: '' });
   const [perms, setPerms] = useState(emptyPermissions());
   const [err, setErr] = useState({});
   const [saving, setSaving] = useState(false);
@@ -18,7 +18,7 @@ export default function AdminDrawer({ isOpen, onClose, mode, admin, onSaved }) {
   useEffect(() => {
     if (!isOpen) return;
     setErr({});
-    setF({ fullName: admin?.fullName || '', username: admin?.username || '', email: admin?.email || '' });
+    setF({ fullName: admin?.fullName || '', username: admin?.username || '', email: admin?.email || '', bankName: admin?.bankName || '', accountNumber: admin?.accountNumber || '', accountName: admin?.accountName || '' });
     setPerms(admin ? { ...emptyPermissions(), ...admin.permissions } : emptyPermissions());
   }, [isOpen, admin, mode]);
 
@@ -63,6 +63,9 @@ export default function AdminDrawer({ isOpen, onClose, mode, admin, onSaved }) {
                 <FormControl isRequired isInvalid={!!err.fullName}><FormLabel>Full name</FormLabel><Input isReadOnly={readOnly} value={f.fullName} onChange={(e) => setF({ ...f, fullName: e.target.value })} /><FormErrorMessage>{err.fullName}</FormErrorMessage></FormControl>
                 <FormControl isRequired isInvalid={!!err.username}><FormLabel>Username</FormLabel><Input isReadOnly={readOnly} autoCapitalize="none" value={f.username} onChange={(e) => setF({ ...f, username: e.target.value })} /><FormErrorMessage>{err.username}</FormErrorMessage></FormControl>
                 <FormControl isRequired isInvalid={!!err.email}><FormLabel>Email address</FormLabel><Input type="email" isReadOnly={readOnly} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /><FormErrorMessage>{err.email}</FormErrorMessage></FormControl>
+                <FormControl><FormLabel>Bank name</FormLabel><Input isReadOnly={readOnly} value={f.bankName} onChange={(e) => setF({ ...f, bankName: e.target.value })} /></FormControl>
+                <FormControl><FormLabel>Account number</FormLabel><Input isReadOnly={readOnly} value={f.accountNumber} onChange={(e) => setF({ ...f, accountNumber: e.target.value })} /></FormControl>
+                <FormControl><FormLabel>Account name</FormLabel><Input isReadOnly={readOnly} value={f.accountName} onChange={(e) => setF({ ...f, accountName: e.target.value })} /></FormControl>
                 {mode === 'create' && <Text fontSize="13px" color={T.muted}>A temporary password is generated when you save. Share it securely — the administrator must change it at first sign-in.</Text>}
               </Stack>
             )}

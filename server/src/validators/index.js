@@ -8,8 +8,17 @@ export const loginSchema = z.object({ identifier: str(120, 1), password: z.strin
 export const changePasswordSchema = z.object({ currentPassword: z.string().min(1).max(200), newPassword: z.string().min(1).max(200) });
 export const profileSchema = z.object({ fullName: str(100, 2), username: str(40, 3).regex(/^[a-zA-Z0-9._-]+$/, 'Username may use letters, numbers, dot, dash and underscore'), email: z.string().trim().email().max(120) });
 
-export const adminCreateSchema = profileSchema.extend({ permissions: z.record(z.any()).optional() });
-export const adminUpdateSchema = profileSchema;
+export const adminCreateSchema = profileSchema.extend({
+  bankName: optStr(100).optional(),
+  accountNumber: optStr(30).optional(),
+  accountName: optStr(100).optional(),
+  permissions: z.record(z.any()).optional(),
+});
+export const adminUpdateSchema = profileSchema.extend({
+  bankName: optStr(100).optional(),
+  accountNumber: optStr(30).optional(),
+  accountName: optStr(100).optional(),
+});
 export const statusSchema = z.object({ status: z.enum(['active', 'inactive']) });
 export const permissionsSchema = z.object({ permissions: z.record(z.any()) });
 
