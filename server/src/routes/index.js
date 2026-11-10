@@ -30,6 +30,7 @@ r.get('/auth/me', authenticate, auth.me);
 r.put('/auth/change-password', authenticate, auth.changePassword);
 r.put('/auth/profile', authenticate, auth.updateProfile);
 r.post('/auth/logout-all', authenticate, auth.logoutAll);
+r.get('/settings/public', settings.getPublic);
 
 // Everything below requires a valid session
 r.use(authenticate);
@@ -76,7 +77,6 @@ r.get('/dashboard/stats', need('dashboard.view'), dash.stats);
 r.get('/dashboard/recent-people', need('dashboard.view', 'people.view'), dash.recentPeople);
 r.get('/dashboard/ward-summary', need('dashboard.view', 'wards.view'), dash.wardSummary);
 r.get('/activity-logs', need('activityLogs.view'), activity.list);
-r.get('/settings/public', settings.getPublic);
 r.get('/settings', need('settings.view'), settings.getAll);
 r.put('/settings', need('settings.edit'), settings.update);
 
