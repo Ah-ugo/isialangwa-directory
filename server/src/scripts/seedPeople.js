@@ -15,12 +15,11 @@ async function run() {
   await mongoose.connect(process.env.MONGODB_URI);
   console.log('Connected to MongoDB');
 
-  // Get first ward and polling unit as defaults
-  const ward = await Ward.findOne().sort({ name: 1 }).lean();
-  const pu = await PollingUnit.findOne({ wardId: ward._id }).sort({ code: 1 }).lean();
-
-  console.log(`Default ward: ${ward.name} (${ward._id})`);
-  console.log(`Default PU: ${pu.name} (${pu._id})`);
+  // Map from old database: all 3 people are in Ward 9 (Ovuokwu) with specific PUs
+  const wardId = new mongoose.Types.ObjectId('6afc1b7d5997207a2f18579b'); // WARD 9 – Ovuokwu
+  const ovorojiPU = new mongoose.Types.ObjectId('6afc1b7e5997207a2f18579f');     // 004 Ovorji – Central School
+  const umuegoroPU = new mongoose.Types.ObjectId('6afc1b815997207a2f1857ab');    // 016 Umuegoro – Village Hall
+  const umurasiPU = new mongoose.Types.ObjectId('6afc1b805997207a2f1857a7');     // 012 Umurasi – Community Civic Hall
 
   const superAdmin = await User.findOne({ role: 'super_admin' }).lean();
   const createdBy = superAdmin?._id;
@@ -30,8 +29,8 @@ async function run() {
       fullName: 'Prince Ahuekwe',
       phone: '+2349028022359',
       normalizedPhone: '+2349028022359',
-      wardId: ward._id,
-      pollingUnitId: pu._id,
+      wardId,
+      pollingUnitId: ovorojiPU,
       address: 'Imo State Government House, Owerri',
       bankName: 'Opay',
       accountNumber: '9028022359',
@@ -50,8 +49,8 @@ async function run() {
       fullName: 'Uloaku Ezekiel',
       phone: '+2348161673883',
       normalizedPhone: '+2348161673883',
-      wardId: ward._id,
-      pollingUnitId: pu._id,
+      wardId,
+      pollingUnitId: umuegoroPU,
       address: 'Umuegoro 016',
       bankName: 'Union Bank',
       accountNumber: '3118893610',
@@ -67,8 +66,8 @@ async function run() {
       fullName: 'Queen Odillanma Nwaogwugwu',
       phone: '+2349025813138',
       normalizedPhone: '+2349025813138',
-      wardId: ward._id,
-      pollingUnitId: pu._id,
+      wardId,
+      pollingUnitId: umurasiPU,
       address: 'Umurasi 012',
       bankName: 'Opay',
       accountNumber: '9023669092',
@@ -83,11 +82,7 @@ async function run() {
   ];
 
   for (const p of people) {
-    const exists = await Person.exists({ normalizedPhone: p.normalizedPhone });
-    if (exists) {
-      console.log(`Skipping ${p.fullName} - phone already exists`);
-      continue;
-    }
+    await Person.deleteOne({ normalizedPhone: p.normalizedPhone });
     await Person.create(p);
     console.log(`Created: ${p.fullName}`);
   }
