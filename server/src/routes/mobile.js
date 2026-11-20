@@ -106,18 +106,19 @@ r.post(
 
 // ---------------------------------------------------------------------------
 // GET /api/mobile/sync
-// Delta sync: return wards, polling units, and paginated people.
+// Delta sync: return wards, polling units, and people.
 // Query params:
 //   since   — ISO date string; if omitted returns everything
 //   wardId  — optional ward filter
+//   all     — boolean; if true returns all people (up to 2000)
 //   page    — pagination (default 1)
-//   limit   — pagination (default 50, max 200)
+//   limit   — pagination (default 200, max 2000)
 // ---------------------------------------------------------------------------
 r.get(
   '/sync',
   mobileAuthenticate,
   asyncHandler(async (req, res) => {
-    const { since, wardId } = req.query;
+    const { since, wardId, all } = req.query;
 
     const sinceDate = since && !isNaN(new Date(since)) ? new Date(since) : null;
 
@@ -125,38 +126,132 @@ r.get(
     const wardFilter = wardId ? { wardId } : {};
 
     const [wards, pollingUnits] = await Promise.all([
-      Ward.find({ ...timeFilter }).lean(),
-      PollingUnit.find({ ...timeFilter, ...wardFilter }).lean(),
+      Ward.find({ ...timeFilter }).sort({ code: 1, name: 1 }).lean(),
+      PollingUnit.find({ ...timeFilter, ...wardFilter }).sort({ code: 1, name: 1 }).lean(),
     ]);
 
-    // Paginated people
-    const { page, limit, skip } = paging(req.query, 50, 200);
     const personFilter = { ...timeFilter, ...wardFilter };
-    const [people, total] = await Promise.all([
-      Person.find(personFilter)
+    let people = [];
+    let meta = {};
+
+    if (all === 'true' || !sinceDate) {
+      people = await Person.find(personFilter)
         .sort({ updatedAt: -1 })
-        .skip(skip)
-        .limit(limit)
+        .limit(2000)
         .populate(POP)
-        .lean(),
-      Person.countDocuments(personFilter),
-    ]);
+        .lean();
+      const total = people.length;
+      meta = { page: 1, limit: total, total, pages: 1 };
+    } else {
+      const { page, limit, skip } = paging(req.query, 200, 2000);
+      const [pList, total] = await Promise.all([
+        Person.find(personFilter)
+          .sort({ updatedAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .populate(POP)
+          .lean(),
+        Person.countDocuments(personFilter),
+      ]);
+      people = pList;
+      meta = pageMeta(page, limit, total);
+    }
 
     ok(res, {
       data: {
-        wards: wards.map((w) => ({ id: w._id, name: w.name, code: w.code, updatedAt: w.updatedAt })),
+        wards: wards.map((w) => ({
+          id: w._id,
+          name: w.name,
+          code: w.code,
+          description: w.description,
+          updatedAt: w.updatedAt,
+        })),
         pollingUnits: pollingUnits.map((u) => ({
           id: u._id,
           name: u.name,
           code: u.code,
           wardId: u.wardId,
+          description: u.description,
           updatedAt: u.updatedAt,
         })),
         people: people.map((p) => serializePerson(p, req.user)),
-        meta: pageMeta(page, limit, total),
+        meta,
         syncedAt: new Date().toISOString(),
       },
     });
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// POST /api/mobile/wards
+// Create a ward via mobile
+// ---------------------------------------------------------------------------
+r.post(
+  '/wards',
+  mobileAuthenticate,
+  asyncHandler(async (req, res) => {
+    const { name, code, description } = req.body || {};
+    if (!name || !name.trim()) throw new ApiError(400, 'Ward name is required');
+    const ward = await Ward.create({
+      name: name.trim(),
+      code: code ? code.trim() : undefined,
+      description: description ? description.trim() : undefined,
+    });
+    await logActivity(req, {
+      adminId: req.user._id,
+      action: 'ward.created',
+      resourceType: 'ward',
+      resourceId: ward._id,
+      description: `Created ward ${ward.name} via mobile`,
+    });
+    ok(res, {
+      data: {
+        id: ward._id,
+        name: ward.name,
+        code: ward.code,
+        description: ward.description,
+        updatedAt: ward.updatedAt,
+      },
+    }, 201);
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// POST /api/mobile/polling-units
+// Create a polling unit via mobile
+// ---------------------------------------------------------------------------
+r.post(
+  '/polling-units',
+  mobileAuthenticate,
+  asyncHandler(async (req, res) => {
+    const { name, code, wardId, description } = req.body || {};
+    if (!name || !name.trim()) throw new ApiError(400, 'Polling unit name is required');
+    if (!wardId) throw new ApiError(400, 'Parent ward is required');
+    if (!(await Ward.exists({ _id: wardId }))) throw new ApiError(400, 'Selected ward does not exist');
+
+    const pu = await PollingUnit.create({
+      name: name.trim(),
+      code: code ? code.trim() : undefined,
+      wardId,
+      description: description ? description.trim() : undefined,
+    });
+    await logActivity(req, {
+      adminId: req.user._id,
+      action: 'pollingUnit.created',
+      resourceType: 'pollingUnit',
+      resourceId: pu._id,
+      description: `Created polling unit ${pu.name} via mobile`,
+    });
+    ok(res, {
+      data: {
+        id: pu._id,
+        name: pu.name,
+        code: pu.code,
+        wardId: pu.wardId,
+        description: pu.description,
+        updatedAt: pu.updatedAt,
+      },
+    }, 201);
   }),
 );
 
