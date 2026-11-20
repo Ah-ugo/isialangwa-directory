@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { env } from './config/env.js';
 import { connectDB } from './config/db.js';
 import routes from './routes/index.js';
+import mobileRoutes from './routes/mobile.js';
 import { sanitize, originCheck, apiLimiter } from './middleware/security.js';
 import { notFound, errorHandler } from './middleware/errors.js';
 
@@ -28,6 +29,8 @@ app.use('/api', apiLimiter);
 app.use('/api/import', express.json({ limit: '5mb' }));
 app.use(express.json({ limit: '100kb' }));
 app.use(sanitize);
+// Mobile routes use Bearer-token auth and are mounted BEFORE originCheck (no CSRF risk).
+app.use('/api/mobile', mobileRoutes);
 app.use(originCheck);
 app.use('/api', routes);
 app.use(notFound);

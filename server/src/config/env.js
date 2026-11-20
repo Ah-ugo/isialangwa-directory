@@ -6,7 +6,10 @@ export const env = {
   PORT: Number(e.PORT) || 5000,
   MONGODB_URI: e.MONGODB_URI || '',
   SESSION_SECRET: e.SESSION_SECRET || '',
-  CLIENT_URLS: (e.CLIENT_URL || 'http://localhost:5173').split(',').map((s) => s.trim().replace(/\/$/, '')),
+  CLIENT_URLS: [
+    ...(e.CLIENT_URL || 'http://localhost:5173').split(',').map((s) => s.trim().replace(/\/$/, '')),
+    ...(e.MOBILE_ORIGINS ? e.MOBILE_ORIGINS.split(',').map((s) => s.trim().replace(/\/$/, '')) : []),
+  ],
   CLOUDINARY_CLOUD_NAME: e.CLOUDINARY_CLOUD_NAME || '',
   CLOUDINARY_API_KEY: e.CLOUDINARY_API_KEY || '',
   CLOUDINARY_API_SECRET: e.CLOUDINARY_API_SECRET || '',

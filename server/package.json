@@ -12,6 +12,7 @@
     "dev": "node --watch server.js",
     "create-superadmin": "node src/scripts/createSuperAdmin.js",
     "seed:wards": "node src/scripts/seedWards.js",
+    "seed:polling-units": "node src/scripts/seedPollingUnits.js",
     "seed:dev": "node src/scripts/seedDev.js"
   },
   "dependencies": {

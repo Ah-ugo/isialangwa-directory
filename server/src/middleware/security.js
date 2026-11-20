@@ -29,6 +29,8 @@ export function sanitize(req, res, next) {
 
 /** CSRF defence for cookie auth: state-changing requests must come from an allowed origin. */
 export function originCheck(req, res, next) {
+  // Mobile API routes use Bearer token auth — CSRF protection via origin is not needed.
+  if (req.path.startsWith('/api/mobile/') || req.originalUrl.includes('/api/mobile/')) return next();
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
   const origin = req.get('origin');
   if (origin && !env.CLIENT_URLS.includes(origin.replace(/\/$/, ''))) return next(new ApiError(403, 'Request origin not allowed'));
